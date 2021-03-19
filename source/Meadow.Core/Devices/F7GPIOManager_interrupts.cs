@@ -17,6 +17,8 @@ namespace Meadow.Devices
     {
         public event InterruptHandler Interrupt;
 
+        public event FrequencyChangeHandler FrequencyChanged;
+
         private Thread _ist = null;
         private List<int> _interruptGroupsInUse = new List<int>();
 

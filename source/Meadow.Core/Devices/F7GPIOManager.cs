@@ -508,6 +508,11 @@ namespace Meadow.Devices
             // write the register
             UPD.SetRegister(address, temp);
         }
+
+        public void ConfigureInputTimer(IPin pin, InterruptMode interruptMode)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /* ===== MEADOW GPIO PIN MAP =====

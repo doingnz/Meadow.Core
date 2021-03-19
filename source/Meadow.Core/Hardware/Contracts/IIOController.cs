@@ -4,6 +4,9 @@ namespace Meadow.Hardware
 {
     public delegate void InterruptHandler(IPin pin, bool state);
 
+    // TODO: This is ugly. we should figure out a better way to surface this.
+    public delegate void FrequencyChangeHandler(IPin pin, float frequency);
+
     // TODO: Consider renaming to match MCP23008 driver: https://github.com/WildernessLabs/Netduino.Foundation/blob/master/Source/Peripheral_Libs/ICs.IOExpanders.MCP23008/Driver/MCP23008.cs
     // Write(IPin pin, bool value)
     // Write(IPin[] pin, byte value)? think about this. need 
@@ -15,6 +18,10 @@ namespace Meadow.Hardware
     public interface IIOController
     {
         event InterruptHandler Interrupt;
+
+        // TODO: This is a hack. 
+        // can't we do: event System.EventHandler<FrequencyChangeHandler> FrequencyChanged; ?
+        event FrequencyChangeHandler FrequencyChanged;
 
         /// <summary>
         /// Initializes the device pins to their default power-up status (outputs, low and pulled down where applicable).
@@ -68,6 +75,16 @@ namespace Meadow.Hardware
             InterruptMode interruptMode,
             double debounceDuration,
             double glitchDuration
+            );
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <param name="interruptMode"></param>
+        void ConfigureInputTimer(
+            IPin pin,
+            InterruptMode interruptMode
             );
 
         /// <summary>
