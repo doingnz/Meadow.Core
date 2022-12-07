@@ -5,13 +5,11 @@ using System.Threading;
 namespace Meadow
 {
     /// <summary>
-    /// 
+    /// An implememntation of a circular (FIFO) buffer
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class CircularBuffer<T> : IEnumerable<T>
     {
-        public event EventHandler ItemAdded = delegate { };
-
         // TODO: this should probably be Span<T>
         private T[] _list;
         private object _syncRoot = new object();
@@ -21,6 +19,10 @@ namespace Meadow
         private bool _lowwaterExceeded = true;
         private AutoResetEvent _addedResetEvent;
 
+        /// <summary>
+        /// Fires when an item is added to the buffer
+        /// </summary>
+        public event EventHandler ItemAdded = delegate { };
         /// <summary>
         /// Fires when an element is added to the buffer when it is already full
         /// </summary>
@@ -68,6 +70,10 @@ namespace Meadow
         /// </summary>
         public bool IsFull { get; private set; }
 
+        /// <summary>
+        /// Creates a CircularBuffer instance of a given size
+        /// </summary>
+        /// <param name="maxElements"></param>
         public CircularBuffer(int maxElements)
         {
             _addedResetEvent = new AutoResetEvent(false);
@@ -160,6 +166,10 @@ namespace Meadow
             }
         }
 
+        /// <summary>
+        /// Appends an item to the tail of the CircularBuffer
+        /// </summary>
+        /// <param name="items"></param>
         public void Append(IEnumerable<T> items)
         {
             foreach (var i in items)
@@ -168,6 +178,12 @@ namespace Meadow
             }
         }
 
+        /// <summary>
+        /// Appends a series of items to the tail of the CircularBuffer
+        /// </summary>
+        /// <param name="items">An array of source items</param>
+        /// <param name="offset">The offset in the source array to begin copying from</param>
+        /// <param name="count">The number of items from the source to append to the CircularBuffer</param>
         public void Append(T[] items, int offset, int count)
         {
             for (int i = offset; i < offset + count; i++)
@@ -175,22 +191,6 @@ namespace Meadow
                 Append(items[i]);
             }
         }
-
-        // TODO: not sure why i can't do this. but LINQ adds Append<T> methods.
-        //public void Append<T>(T element)
-        //{
-        //    this.Enqueue(element);
-        //}
-
-        //public void Append(T element)
-        //{
-        //    this.Enqueue(element);
-        //}
-
-        //public void Append(IEnumerable<T> items)
-        //{
-        //    this.Enqueue(items);
-        //}
 
         /// <summary>
         /// Adds an element to the head of the buffer
@@ -237,6 +237,11 @@ namespace Meadow
             }
         }
 
+        /// <summary>
+        /// Waits for an item to be appended to the CircularBuffer (or for a timeout period).
+        /// </summary>
+        /// <param name="millisecondsTimeout"></param>
+        /// <returns></returns>
         public bool AppendWaitOne(int millisecondsTimeout)
         {
             return _addedResetEvent.WaitOne(millisecondsTimeout);
@@ -296,6 +301,10 @@ namespace Meadow
             }
         }
 
+        /// <summary>
+        /// This method is called when the CircularBuffer overruns
+        /// </summary>
+        /// <exception cref="BufferException"></exception>
         public virtual void OnOverrun()
         {
             HasOverrun = true;
@@ -307,6 +316,10 @@ namespace Meadow
             Overrun?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// The method is called when the CircularBuffer is underrun
+        /// </summary>
+        /// <exception cref="BufferException"></exception>
         public virtual void OnUnderrun()
         {
             HasUnderrun = true;
@@ -447,6 +460,13 @@ namespace Meadow
             return result;
         }
 
+        /// <summary>
+        /// Copies CircularBuffer items to a destination array and removes them from the CircularBuffer
+        /// </summary>
+        /// <param name="destination"></param>
+        /// <param name="index"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public int MoveItemsTo(T[] destination, int index, int count)
         {
             if (count <= 0) { return 0; }
@@ -501,6 +521,11 @@ namespace Meadow
             }
         }
 
+        /// <summary>
+        /// An indexer for items in the CircularBuffer by numeric index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public T this[int index]
         {
             get
@@ -519,6 +544,10 @@ namespace Meadow
             }
         }
 
+        /// <summary>
+        /// Returns an enumerator that enumerates the CircularBuffer
+        /// </summary>
+        /// <returns></returns>
         public IEnumerator<T> GetEnumerator()
         {
             // we don't want to enumerate values outside of our "valid" range
@@ -541,8 +570,15 @@ namespace Meadow
         }
     }
 
+    /// <summary>
+    /// An exception raised by a CircularBuffer
+    /// </summary>
     public class BufferException : Exception
     {
+        /// <summary>
+        /// Creates an instance of a BufferException
+        /// </summary>
+        /// <param name="message"></param>
         public BufferException(string message)
             : base(message)
         {

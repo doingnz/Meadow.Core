@@ -8,6 +8,9 @@ using System.Text.Json;
 
 namespace Meadow.Update
 {
+    /// <summary>
+    /// The local on-device storage mechanism for OS an Application updates used by the <see cref="UpdateService"/> 
+    /// </summary>
     public class UpdateStore : IEnumerable<UpdateInfo>
     {
         private const string UpdateInfoFileName = "info.json";
@@ -124,6 +127,9 @@ namespace Meadow.Update
             File.WriteAllText(dest, json);
         }
 
+        /// <summary>
+        /// Deletes all local updates in the store
+        /// </summary>
         public void Clear()
         {
             _updates.Clear();
@@ -143,6 +149,11 @@ namespace Meadow.Update
             return message != null;
         }
 
+        /// <summary>
+        /// Retrieves the local path to the requested update package
+        /// </summary>
+        /// <param name="updateID"></param>
+        /// <returns></returns>
         public string? GetUpdateArchivePath(string updateID)
         {
             var dest = Path.Combine(_storeDirectory.FullName, updateID);
@@ -174,6 +185,11 @@ namespace Meadow.Update
             return fi.Create();
         }
 
+        /// <summary>
+        /// Generates a SHA256 hash for the give file
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
         public string GetFileHash(FileInfo file)
         {
             using (var sha = SHA256.Create())
@@ -203,6 +219,10 @@ namespace Meadow.Update
             SaveOrUpdateMessage(message);
         }
 
+        /// <summary>
+        /// Returns an enumerator that enumerates through the updates in the store
+        /// </summary>
+        /// <returns></returns>
         public IEnumerator<UpdateInfo> GetEnumerator()
         {
             return _updates.GetEnumerator();
