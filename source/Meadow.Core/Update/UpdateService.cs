@@ -81,7 +81,7 @@ public class UpdateService : IUpdateService
     /// <summary>
     /// Stops the service
     /// </summary>
-    public void Shutdown()
+    public void Stop()
     {
         _stopService = true;
     }
